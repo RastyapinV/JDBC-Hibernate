@@ -1,30 +1,27 @@
 package jm.task.core.jdbc.util;
 
-import org.postgresql.Driver;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.io.File;
 
 public class Util implements AutoCloseable{
-    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "12.11.FB";
 
-
-    public static Connection connection;
-    public static Connection getConnection() {
+    public static SessionFactory sessionFactory;
+    public static SessionFactory getSessionFactory() {
         try {
-            DriverManager.registerDriver(new Driver());
-            connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            return connection;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            sessionFactory = new Configuration()
+                    .configure(new File("src\\main\\resources\\hibernate.cfg.xml"))
+                    .buildSessionFactory();
+            return sessionFactory;
+        } catch (Throwable e) {
+            System.err.println("Initial SessionFactory creation failed." + e);
+            throw new ExceptionInInitializerError(e);
         }
     }
 
     @Override
     public void close() throws Exception {
-        connection.close();
+        sessionFactory.close();
     }
 }
